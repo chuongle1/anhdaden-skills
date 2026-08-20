@@ -32,8 +32,12 @@ review-code/
 3. Dùng các MCP tool do `codegraph serve` cung cấp để nắm cấu trúc & trace luồng gọi:
    `codegraph_status`, `codegraph_files`, `codegraph_search_by_annotation` (tìm entry point), `codegraph_search_by_call` (tìm sink nguy hiểm), `codegraph_callers`/`codegraph_callees`, `codegraph_flow`/`codegraph_search_flow` (trace input→sink), `codegraph_symbol`/`codegraph_references`/`codegraph_context`, `codegraph_impact`.
 4. Áp dụng checklist ở `references/checklist.md`, chỉ báo cáo phát hiện có bằng chứng cụ thể trong code.
-5. Xác nhận khả năng khai thác bằng cách trace input → sink qua codegraph.
-6. Xếp severity (Critical/High/Medium/Low) và xuất bảng kết quả theo format trong `SKILL.md`.
+5. Trace khả năng khai thác bằng input → sink qua codegraph.
+6. **Verify tĩnh** — chủ động tìm lý do bác bỏ (lớp validation/sanitize bị bỏ sót, input có thực sự do bên ngoài kiểm soát không, verify độc lập từng finding cùng pattern) trước khi giữ lại.
+7. **Xác minh bằng unit test khi khả thi** — viết test tạm nhắm vào luồng nghi vấn để lấy bằng chứng thực nghiệm; pass → tăng độ tin cậy, không tái hiện được → hạ độ tin cậy/loại bỏ. Không commit test tạm vào repo user.
+8. **Tạo PoC phi phá hoại** cho finding đã xác nhận (test pass hoặc verify tĩnh đủ chắc), để user tự chạy kiểm chứng thêm — không thực thi hành động phá hoại thật, chỉ minh hoạ khả năng khai thác trong phạm vi được cấp quyền review.
+9. Xếp severity (Critical/High/Medium/Low, ưu tiên nâng cho finding có evidence từ test/PoC).
+10. **Ghi kết quả vào `SECURITY_FINDING.md` ở root repo** (đọc file cũ và cập nhật nếu đã tồn tại, không ghi đè toàn bộ) — bảng kết quả + PoC/test nằm trong file này, **không in chi tiết ra chat**; trong chat chỉ báo đường dẫn file và tổng số finding theo severity.
 
 Nếu `codegraph init` hoặc các tool `codegraph_*` không khả dụng, skill sẽ nêu rõ và fallback sang khảo sát thủ công (Grep/Explore) thay vì im lặng bỏ qua.
 
