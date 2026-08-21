@@ -39,7 +39,7 @@ review-code/
 9. Xếp severity (Critical/High/Medium/Low, ưu tiên nâng cho finding có evidence từ test/PoC).
 10. **Ghi kết quả vào `SECURITY_FINDING.md` ở root repo** (đọc file cũ và cập nhật nếu đã tồn tại, không ghi đè toàn bộ) — bảng kết quả + PoC/test nằm trong file này, **không in chi tiết ra chat**; trong chat chỉ báo đường dẫn file và tổng số finding theo severity.
 
-Nếu `codegraph init` hoặc các tool `codegraph_*` không khả dụng, skill sẽ nêu rõ và fallback sang khảo sát thủ công (Grep/Explore) thay vì im lặng bỏ qua.
+Nếu `codegraph init` hoặc các tool `codegraph_*` không khả dụng, skill sẽ gợi ý chạy skill `codegraph-setup` (kiểm tra/kết nối lại MCP + index) trước; nếu vẫn không được mới fallback sang khảo sát thủ công (Grep/Explore) — không im lặng bỏ qua.
 
 ## Việc cần tuỳ chỉnh thêm
 `references/checklist.md` hiện là bộ mặc định dạng OWASP-style — nên chỉnh lại cho khớp rubric/severity thực tế của secteam trước khi dùng chính thức.

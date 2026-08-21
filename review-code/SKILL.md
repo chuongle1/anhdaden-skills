@@ -21,7 +21,7 @@ description: Phân tích/review bảo mật source code theo yêu cầu cụ th�
      - `codegraph_flow` / `codegraph_search_flow` — trace luồng dữ liệu input → sink trực tiếp.
      - `codegraph_symbol` / `codegraph_search_symbol` / `codegraph_references` / `codegraph_context` — tra định nghĩa, nơi dùng, ngữ cảnh quanh 1 symbol.
      - `codegraph_impact` — đánh giá phạm vi ảnh hưởng nếu 1 symbol bị khai thác.
-   - Nếu `codegraph init` không chạy được (tool không có sẵn, repo không hỗ trợ) hoặc các tool `codegraph_*` không xuất hiện trong danh sách tool khả dụng, nêu rõ điều này rồi fallback sang khảo sát thủ công (Grep/Explore) trước khi tiếp tục — không im lặng bỏ qua bước này.
+   - Nếu `codegraph init` không chạy được (tool không có sẵn, repo không hỗ trợ) hoặc các tool `codegraph_*` không xuất hiện trong danh sách tool khả dụng, gợi ý chạy skill `codegraph-setup` để kiểm tra/kết nối lại trước. Nếu sau đó vẫn không được (vd đang ở phiên hiện tại nên tool `codegraph_*` chưa load), nêu rõ điều này rồi fallback sang khảo sát thủ công (Grep/Explore) — không im lặng bỏ qua bước này.
 3. Thu thập code cần đọc theo phạm vi, dựa trên kết quả truy vấn codegraph ở bước 2:
    - **Phạm vi cụ thể**: đọc toàn bộ đoạn code liên quan, dùng `codegraph_callers`/`codegraph_callees`/`codegraph_references` để lần ra các hàm/module liên đới nếu cần hiểu luồng dữ liệu thực tế — không suy đoán hành vi.
    - **Toàn bộ repo**: dùng `codegraph_search_by_annotation`/`codegraph_files` để xác định entry point, và `codegraph_search_by_call` để liệt kê toàn bộ nơi gọi tới các sink nguy hiểm theo từng nhóm checklist — thay vì đọc ngẫu nhiên. Mục tiêu là bao phủ đủ các nhóm rủi ro trên toàn repo, không phải đọc hết mọi dòng code.
