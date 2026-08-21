@@ -7,6 +7,7 @@ Bộ Claude Skills cho security team. Các skill chạy ở mức **personal** t
 | Skill | Vị trí thực tế | Mô tả |
 |---|---|---|
 | `review-code` | `~/.claude/skills/review-code/` | Review bảo mật source code theo yêu cầu cụ thể hoặc quét toàn bộ repo, dùng checklist riêng của team + MCP server [codegraph](https://github.com/hungpham10/codegraph-rs) để trace cấu trúc/luồng gọi. Xem chi tiết ở README của skill. |
+| `codegraph-setup` | `~/.claude/skills/codegraph-setup/` | Skill hạ tầng: kiểm tra, khởi tạo (`codegraph init`) và đăng ký MCP server `codegraph` (`codegraph serve --mcp`) cho repo hiện tại. Không review/phân tích code — chỉ chuẩn bị môi trường cho các skill khác cần `codegraph_*` (vd `review-code`). Xem chi tiết ở README của skill. |
 
 ## Quy ước chung khi viết skill mới
 - Vị trí: `~/.claude/skills/<ten-skill>/SKILL.md` (kebab-case, tên thư mục = tên skill).
