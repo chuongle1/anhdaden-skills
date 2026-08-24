@@ -38,6 +38,15 @@
 - Thiếu rate limit/throttle ở endpoint dễ bị brute-force hoặc abuse.
 - Giả định sai về trust boundary (tin dữ liệu từ client mà lẽ ra phải validate lại ở server).
 
+## 8. Prompt Injection (LLM/AI integration)
+- Prompt injection trực tiếp: input user được nối thẳng vào system/instruction prompt mà không có ranh giới rõ ràng (delimiter, cấu trúc message riêng) giữa instruction và data.
+- Prompt injection gián tiếp: nội dung từ nguồn không tin cậy (web page, file upload, kết quả tool/API, email, tài liệu bên thứ ba) được đưa vào ngữ cảnh của LLM và có thể chứa chỉ thị giả mạo.
+- LLM có quyền gọi tool/function (đọc file, gọi API, exec code, truy vấn DB) mà không có lớp kiểm soát/allowlist độc lập với chính LLM — để LLM tự quyết định hành động nhạy cảm dựa trên nội dung không tin cậy.
+- Thiếu tách bạch trust boundary: output của LLM được tin dùng trực tiếp làm input cho hành động có side-effect (query DB, gọi API, ghi file, gửi request) mà không validate/sanitize lại như với input từ user.
+- System prompt/hướng dẫn bảo mật bị lộ hoặc có thể bị trích xuất qua input crafted (system prompt leakage), làm lộ logic guardrail.
+- Thiếu giới hạn phạm vi ngữ cảnh: toàn bộ conversation history/RAG context được đưa vào không lọc, cho phép injection từ lượt trước ảnh hưởng lượt sau.
+- Không có cơ chế phát hiện/giảm thiểu (output filtering, permission theo tool, human-in-the-loop cho hành động nhạy cảm) khi LLM xử lý nội dung từ nguồn ngoài.
+
 ## Nguyên tắc chung khi áp dụng checklist
 - Chỉ báo cáo phát hiện có bằng chứng cụ thể trong code (dòng, biến, luồng dữ liệu) — không liệt kê rủi ro lý thuyết không khớp với code thực tế.
 - Ưu tiên trace luồng input → xử lý → sink để xác nhận khả năng khai thác trước khi xếp severity.
