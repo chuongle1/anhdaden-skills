@@ -26,7 +26,7 @@ description: Phân tích/review bảo mật source code theo yêu cầu cụ th�
    - **Phạm vi cụ thể**: đọc toàn bộ đoạn code liên quan, dùng `codegraph_callers`/`codegraph_callees`/`codegraph_references` để lần ra các hàm/module liên đới nếu cần hiểu luồng dữ liệu thực tế — không suy đoán hành vi.
    - **Toàn bộ repo**: dùng `codegraph_search_by_annotation`/`codegraph_files` để xác định entry point, và `codegraph_search_by_call` để liệt kê toàn bộ nơi gọi tới các sink nguy hiểm theo từng nhóm checklist — thay vì đọc ngẫu nhiên. Mục tiêu là bao phủ đủ các nhóm rủi ro trên toàn repo, không phải đọc hết mọi dòng code.
 4. Áp dụng từng nhóm rủi ro trong `references/checklist.md`. Với mỗi nhóm, chỉ báo cáo nếu tìm thấy bằng chứng cụ thể trong code (dòng, biến, luồng gọi) — không liệt kê rủi ro lý thuyết chung chung.
-5. Với mỗi phát hiện nghi ngờ, trace lại bằng `codegraph_flow`/`codegraph_search_flow` (hoặc `codegraph_callers`+`codegraph_callees` nối tay) để xác nhận input → xử lý → sink, đảm bảo không bỏ sót lời gọi gián tiếp.
+5. Với mỗi phát hiện nghi ngờ, trace lại bằng `codegraph_flow`/`codegraph_search_flow` (hoặc `codegraph_callers`+`codegraph_callees` nối tay) để xác nhận input → xử lý → sink, đảm bảo không bỏ sót lời gọi gián tiếp. **Ghi lại toàn bộ chuỗi hop (entry point → hàm trung gian → sink, mỗi hop kèm `file:line`)** ngay lúc trace — đây là dữ liệu bắt buộc để dựng attack flow ở bước 10, không suy diễn lại từ trí nhớ sau đó.
 6. **Verify từng phát hiện trước khi đưa vào báo cáo** — chủ động tìm lý do bác bỏ, không mặc định tin phát hiện ban đầu là đúng:
    - Kiểm tra xem giữa input và sink có lớp validation/sanitize/escape nào mà bước trace ở trên có thể đã bỏ sót không (middleware, decorator, ORM tự escape, framework mặc định an toàn).
    - Xác nhận input thực sự do bên ngoài/user kiểm soát được, không phải config nội bộ cố định hay giá trị đã qua allowlist trước đó.
@@ -47,9 +47,11 @@ description: Phân tích/review bảo mật source code theo yêu cầu cụ th�
 ## Output — file `SECURITY_FINDING.md`
 Nội dung file gồm bảng theo severity giảm dần, chỉ gồm finding đã qua bước verify ở trên:
 
-| Severity | File:Line | Vấn đề | Rủi ro / Kịch bản khai thác | Bằng chứng | Đề xuất khắc phục |
-|---|---|---|---|---|---|
-| High | app.py:42 | ... | ... | Unit test pass (kèm PoC) / Verify tĩnh / Cần xác minh thêm | ... |
+| Severity | File:Line | Vấn đề | Attack Flow (codegraph trace) | Rủi ro / Kịch bản khai thác | Bằng chứng | Đề xuất khắc phục |
+|---|---|---|---|---|---|---|
+| High | app.py:42 | ... | `route /upload (app.py:10)` → `handle_upload() (app.py:25)` → `save_file() (utils.py:60)` → sink `open(path, "wb") (utils.py:78)` | ... | Unit test pass (kèm PoC) / Verify tĩnh / Cần xác minh thêm | ... |
+
+**Mỗi finding bắt buộc phải có cột Attack Flow**, dựng từ chuỗi hop đã ghi lại ở bước 5 (`codegraph_flow`/`codegraph_search_flow`/`codegraph_callers`+`codegraph_callees`) — liệt kê đủ entry point (route/handler nhận input từ bên ngoài) → từng hàm trung gian → sink, mỗi hop kèm `tên_hàm (file:line)`. Không viết attack flow chung chung kiểu "attacker gửi input độc hại tới server" nếu không kèm chuỗi hop cụ thể từ codegraph; nếu một hop không trace được qua codegraph (vd gọi động, reflection), ghi rõ hop đó là "không trace được qua codegraph, xác định thủ công" thay vì bỏ qua hoặc suy đoán.
 
 Với finding có unit test/PoC, đính kèm ngay bên dưới bảng (trong file, không phải trong chat): đoạn code test (nếu có) và PoC tương ứng, kèm hướng dẫn ngắn để user tự chạy thử. Nếu review toàn bộ repo, nhóm kết quả theo file/module trong cùng file này để dễ theo dõi, và nêu rõ những phần nào đã quét/chưa quét nếu repo quá lớn để đọc hết.
 
