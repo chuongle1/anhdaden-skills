@@ -1,10 +1,10 @@
-# review-code
+# audit-code
 
-Claude Skill (personal, `~/.claude/skills/review-code/`) — review bảo mật source code theo yêu cầu cụ thể của user hoặc quét toàn bộ repo/codebase, dùng checklist riêng của security team và MCP server `codegraph` để trace cấu trúc/luồng gọi thay vì đoán.
+Claude Skill (personal, `~/.claude/skills/audit-code/`) — review bảo mật source code theo yêu cầu cụ thể của user hoặc quét toàn bộ repo/codebase, dùng checklist riêng của security team và MCP server `codegraph` để trace cấu trúc/luồng gọi thay vì đoán.
 
 ## Cấu trúc
 ```
-review-code/
+audit-code/
   SKILL.md              # frontmatter (name/description) + quy trình review
   references/
     checklist.md         # checklist chi tiết theo từng nhóm rủi ro (injection, authN/authZ, secrets, crypto, dependency, logging, business logic abuse)

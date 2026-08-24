@@ -1,13 +1,13 @@
 # codegraph-setup
 
-Claude Skill (personal, `~/.claude/skills/codegraph-setup/`) — kiểm tra, khởi tạo và kết nối tool `codegraph` (`codegraph-rs`) làm MCP server cho Claude Code trên repo hiện tại. Đây là skill hạ tầng, dùng để chuẩn bị môi trường cho các skill khác cần `codegraph_*` (vd `review-code`), bản thân nó không review/phân tích code.
+Claude Skill (personal, `~/.claude/skills/codegraph-setup/`) — kiểm tra, khởi tạo và kết nối tool `codegraph` (`codegraph-rs`) làm MCP server cho Claude Code trên repo hiện tại. Đây là skill hạ tầng, dùng để chuẩn bị môi trường cho các skill khác cần `codegraph_*` (vd `audit-code`), bản thân nó không review/phân tích code.
 
 ## Vì sao cần skill này
 Tool `codegraph` không có subcommand cài đặt tự động (`codegraph install` không tồn tại — CLI chỉ có `init` / `deinit` / `serve`). Flow chuẩn là làm thủ công: `codegraph init` để dựng index, rồi đăng ký `codegraph serve --mcp` làm MCP server cho Claude Code. Skill này đóng gói lại đúng flow thủ công đó, có kiểm tra từng bước để không lặp lại việc đã xong hoặc ghi đè cấu hình đang hoạt động.
 
 ## Phạm vi & ranh giới với skill khác
 - **Dùng khi**: cần setup/kết nối/kiểm tra lại hạ tầng `codegraph` cho một repo.
-- **Không dùng khi**: cần review/phân tích bảo mật code → dùng skill `review-code` (skill đó sẽ tự gợi ý chạy `codegraph-setup` nếu phát hiện tool `codegraph_*` chưa sẵn sàng).
+- **Không dùng khi**: cần review/phân tích bảo mật code → dùng skill `audit-code` (skill đó sẽ tự gợi ý chạy `codegraph-setup` nếu phát hiện tool `codegraph_*` chưa sẵn sàng).
 
 ## Cách hoạt động (tóm tắt)
 1. Kiểm tra `.codegraph/` đã tồn tại ở root repo chưa — làm trước tiên vì user có thể đã tự chạy `codegraph init` từ trước, tránh chạy `init` mù quáng hoặc ghi đè.

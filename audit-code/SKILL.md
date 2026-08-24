@@ -1,5 +1,5 @@
 ---
-name: review-code
+name: audit-code
 description: Phân tích/review bảo mật source code theo yêu cầu cụ thể của user — có thể là một đoạn code/file/module cụ thể, hoặc quét toàn bộ repository/codebase hiện tại — theo checklist riêng của security team (input validation, injection, authN/authZ, secrets, crypto, deserialization, dependency, business logic abuse). Dùng khi user yêu cầu "phân tích code", "review code này", "audit bảo mật repo/project này", "quét toàn bộ codebase tìm lỗ hổng", hoặc dán một đoạn/file code kèm yêu cầu đánh giá. Không dùng khi chỉ cần review style/logic/hiệu năng không liên quan bảo mật (dùng skill code-review), và không dùng cho quy trình review pending diff trên branch hiện tại (dùng skill security-review).
 ---
 

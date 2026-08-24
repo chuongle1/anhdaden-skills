@@ -1,11 +1,11 @@
 ---
 name: codegraph-setup
-description: Kiểm tra, khởi tạo (`codegraph init`) và kết nối MCP server `codegraph` (`codegraph serve --mcp`) cho Claude Code trên repo hiện tại. Dùng khi user yêu cầu "setup codegraph", "kết nối codegraph", "khởi tạo codegraph cho repo này", "connect codegraph MCP", hoặc khi một skill khác (vd review-code) báo tool codegraph_* không khả dụng và cần setup lại. Không dùng để review/phân tích code — skill này chỉ lo phần cài đặt/kết nối hạ tầng.
+description: Kiểm tra, khởi tạo (`codegraph init`) và kết nối MCP server `codegraph` (`codegraph serve --mcp`) cho Claude Code trên repo hiện tại. Dùng khi user yêu cầu "setup codegraph", "kết nối codegraph", "khởi tạo codegraph cho repo này", "connect codegraph MCP", hoặc khi một skill khác (vd audit-code) báo tool codegraph_* không khả dụng và cần setup lại. Không dùng để review/phân tích code — skill này chỉ lo phần cài đặt/kết nối hạ tầng.
 ---
 
 ## Khi nào dùng
 - User yêu cầu trực tiếp: "setup codegraph", "kết nối codegraph cho repo này", "khởi tạo codegraph", "connect codegraph MCP".
-- Một skill khác (vd `review-code`) không dùng được tool `codegraph_*` và cần setup/kiểm tra lại trước khi tiếp tục.
+- Một skill khác (vd `audit-code`) không dùng được tool `codegraph_*` và cần setup/kiểm tra lại trước khi tiếp tục.
 
 Không có cơ chế `codegraph install` tự động nào có sẵn trong bản thân tool `codegraph` — skill này đóng gói lại quy trình thủ công (init + đăng ký MCP) thành các bước lặp lại được, tự kiểm tra từng phần trước khi làm để tránh lặp lại việc đã xong.
 
