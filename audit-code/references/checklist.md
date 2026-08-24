@@ -1,7 +1,14 @@
 # Checklist review bảo mật source code
 
 ## 1. Input validation & Injection
-- SQL/NoSQL injection: query build bằng string concat/format thay vì parameterized query hoặc ORM an toàn.
+- SQL injection: query build bằng string concat/format thay vì parameterized query hoặc ORM an toàn.
+- NoSQL injection:
+  - Operator injection: input user (thường từ JSON body) được đưa thẳng vào query object mà không ép kiểu/whitelist field, cho phép lọt operator như `$where`, `$ne`, `$gt`, `$regex`, `$or` (vd MongoDB nhận `{"username": {"$ne": null}}` thay vì string do parser tự parse JSON thành object).
+  - `$where`/`mapReduce`/`$function`/`$accumulator` dùng JS expression build từ string concat với input user — tương đương command injection trong ngữ cảnh NoSQL, cho phép thực thi JS tuỳ ý phía DB.
+  - Query bằng driver dạng "raw"/string (vd `db.eval`, query string tự ghép) thay vì query builder có kiểu (typed) của driver.
+  - Thiếu whitelist field/key cho phép build query động: object injection qua key lồng nhau (vd `req.body` đưa thẳng vào `$set`/`$unset`/filter mà không lọc field nhạy cảm như `role`, `isAdmin`).
+  - Input dùng để build tên collection/field động (dynamic collection/field name) mà không validate, cho phép truy cập ngoài phạm vi dự kiến.
+  - ORM/ODM (Mongoose, v.v.) tắt schema strict mode hoặc dùng `.lean()`/cast tuỳ ý khiến operator injection lọt qua tầng validate của model.
 - Command injection: input người dùng đi thẳng vào shell exec, subprocess, os.system.
 - Path traversal: input dùng để build file path không được sanitize/normalize.
 - XSS: output ra HTML/JS mà không escape, đặc biệt render trực tiếp input user.
