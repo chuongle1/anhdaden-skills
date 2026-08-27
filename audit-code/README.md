@@ -28,7 +28,7 @@ audit-code/
 
 ## Cách hoạt động (tóm tắt)
 1. Xác định phạm vi review (đoạn/file/module cụ thể, hay toàn bộ repo).
-2. Chạy `codegraph init` tại root repo để dựng index (`.codegraph/`, dạng SQLite nội bộ — không đọc trực tiếp).
+2. **Luôn dựng lại index mới nhất**: nếu `.codegraph/` đã tồn tại ở root repo, xoá và `codegraph init` lại (`rm -rf .codegraph && codegraph init`, không hỏi trước) để đảm bảo phản ánh đúng code hiện tại; nếu chưa có thì init bình thường (`.codegraph/`, dạng SQLite nội bộ — không đọc trực tiếp).
 3. Dùng các MCP tool do `codegraph serve` cung cấp để nắm cấu trúc & trace luồng gọi:
    `codegraph_status`, `codegraph_files`, `codegraph_search_by_annotation` (tìm entry point), `codegraph_search_by_call` (tìm sink nguy hiểm), `codegraph_callers`/`codegraph_callees`, `codegraph_flow`/`codegraph_search_flow` (trace input→sink), `codegraph_symbol`/`codegraph_references`/`codegraph_context`, `codegraph_impact`.
 4. Áp dụng checklist ở `references/checklist.md`, chỉ báo cáo phát hiện có bằng chứng cụ thể trong code.

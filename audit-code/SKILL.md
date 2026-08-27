@@ -10,8 +10,11 @@ description: Phân tích/review bảo mật source code theo yêu cầu cụ th�
 
 ## Quy trình
 1. Xác định phạm vi thực tế của yêu cầu: đoạn/file/module cụ thể, hay toàn bộ repo. Nếu chưa rõ, hỏi lại thay vì đoán.
-2. **Dựng chỉ mục repo bằng codegraph** (bắt buộc, áp dụng cho cả 2 phạm vi):
-   - Chạy `codegraph init` tại thư mục gốc của repo đang review. Lệnh này tạo thư mục `.codegraph/` chứa index dạng SQLite nội bộ — **không đọc trực tiếp file này**, nó chỉ được truy vấn qua MCP server `codegraph` (đã đăng ký sẵn ở user scope, cần mở phiên Claude Code mới để tool xuất hiện nếu vừa mới đăng ký).
+2. **Luôn dựng lại chỉ mục mới nhất bằng codegraph** (bắt buộc, áp dụng cho cả 2 phạm vi):
+   - Kiểm tra `.codegraph/` đã tồn tại ở root repo chưa (`ls -la .codegraph`).
+   - Nếu **đã có** → xoá và init lại (`rm -rf .codegraph && codegraph init`) để đảm bảo index phản ánh đúng code hiện tại tại thời điểm audit, không dựa vào index cũ có thể đã lệch khỏi code (vd đã có commit mới từ lần audit trước). Không cần hỏi lại trước khi xoá — đây là hành vi mặc định của skill.
+   - Nếu **chưa có** → chạy `codegraph init` bình thường tại thư mục gốc của repo đang review.
+   - Lệnh này tạo thư mục `.codegraph/` chứa index dạng SQLite nội bộ — **không đọc trực tiếp file này**, nó chỉ được truy vấn qua MCP server `codegraph` (đã đăng ký sẵn ở user scope, cần mở phiên Claude Code mới để tool xuất hiện nếu vừa mới đăng ký).
    - Sau khi index xong, dùng các MCP tool sau để nắm cấu trúc và trace luồng gọi (thay vì đọc code rời rạc theo cảm tính):
      - `codegraph_status` — kiểm tra index đã sẵn sàng.
      - `codegraph_files` / `codegraph_list_classes` / `codegraph_list_interfaces` — nắm cấu trúc tổng thể repo.
