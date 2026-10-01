@@ -9,6 +9,7 @@ Bộ Claude Skills cho security team. Các skill chạy ở mức **personal** t
 | `codegraph-setup` | `~/.claude/skills/codegraph-setup/` | Skill hạ tầng: kiểm tra, khởi tạo (`codegraph init`) và đăng ký MCP server `codegraph` (`codegraph serve --mcp`) cho repo hiện tại. Không review/phân tích code — chỉ chuẩn bị môi trường cho các skill khác cần `codegraph_*` (vd `audit-code`). Xem chi tiết ở README của skill. |
 | `audit-code` | `~/.claude/skills/audit-code/` | Review bảo mật source code theo yêu cầu cụ thể hoặc quét toàn bộ repo, dùng checklist riêng của team + MCP server [codegraph](https://github.com/hungpham10/codegraph-rs) để trace cấu trúc/luồng gọi. Xem chi tiết ở README của skill. |
 | `explore-architecture` | `~/.claude/skills/explore-architecture/` | Khám phá và giải thích kiến trúc/tổng quan cấp cao của repo, service hoặc module (entry point, layering, domain model, dependency, luồng dữ liệu chính) bằng MCP server `codegraph` — dùng cho onboarding/hiểu codebase, không phải audit bảo mật. Xem chi tiết ở README của skill. |
+| `document-repo` | `~/.claude/skills/document-repo/` | Sinh tài liệu giới thiệu repo thành 2 file markdown cố định ở root: `ARCHITECTURE.md` (dân kỹ thuật) và `OVERVIEW.md` (dân non-tech), dùng MCP server `codegraph` để bám sát bằng chứng trong code, không suy diễn. Khác `explore-architecture` ở chỗ luôn ghi file và có thêm góc nhìn non-tech. Xem chi tiết ở README của skill. |
 
 ## Quy ước chung khi viết skill mới
 - Vị trí: `~/.claude/skills/<ten-skill>/SKILL.md` (kebab-case, tên thư mục = tên skill).
