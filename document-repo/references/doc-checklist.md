@@ -9,7 +9,7 @@
 
 ## Khung nội dung `ARCHITECTURE.md` (dân kỹ thuật)
 1. **Entry point** — route/API (REST, GraphQL, RPC), CLI command, cron job, message queue consumer/event handler. Nếu nhiều loại cùng tồn tại, liệt kê tách biệt theo loại.
-2. **Layering & tổ chức module** — theo layer kỹ thuật (controller/service/repository) hay theo domain/feature, hay monorepo nhiều service; hướng phụ thuộc giữa layer/module (chỉ nêu nếu có bằng chứng từ `codegraph_dependencies`); tầng shared/common nếu có.
+2. **Layering & tổ chức module** — theo layer kỹ thuật (controller/service/repository) hay theo domain/feature, hay monorepo nhiều service; hướng phụ thuộc giữa layer/module (chỉ nêu nếu có bằng chứng từ `codegraph_graphcode_dependencies`); tầng shared/common nếu có.
 3. **Domain model chính** — entity/class trung tâm đại diện nghiệp vụ (không phải class tiện ích), quan hệ giữa chúng (composition/inheritance/aggregate).
 4. **Chức năng/module kỹ thuật** — chức năng suy ra từ entry point + logic xử lý, viết theo góc nhìn kỹ thuật, kèm `file:line`.
 5. **Luồng dữ liệu cho use case tiêu biểu** — chọn 1-2 use case đại diện nhất, trace đủ từ entry point tới nơi dữ liệu dừng lại (DB, response, message publish), không dừng giữa chừng.

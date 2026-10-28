@@ -1,23 +1,27 @@
 # codegraph-setup
 
-Claude Skill (personal, `~/.claude/skills/codegraph-setup/`) — kiểm tra, khởi tạo và kết nối tool `codegraph` (`codegraph-rs`) làm MCP server cho Claude Code trên repo hiện tại. Đây là skill hạ tầng, dùng để chuẩn bị môi trường cho các skill khác cần `codegraph_*` (vd `audit-code`), bản thân nó không review/phân tích code.
+Claude Skill (personal, `~/.claude/skills/codegraph-setup/`): skill hạ tầng cho [codegraph-rs](https://github.com/hungpham10/codegraph-rs) **v2.x**. Nó lo việc cài/kiểm tra binary, đăng ký MCP server cho Claude Code, rồi bind và index repo qua MCP. Skill không review hay phân tích code, mà chuẩn bị môi trường cho các skill dùng `codegraph_*` (`audit-code`, `explore-architecture`, `document-repo`).
 
-## Vì sao cần skill này
-Tool `codegraph` không có subcommand cài đặt tự động (`codegraph install` không tồn tại — CLI chỉ có `init` / `deinit` / `serve`). Flow chuẩn là làm thủ công: `codegraph init` để dựng index, rồi đăng ký `codegraph serve --mcp` làm MCP server cho Claude Code. Skill này đóng gói lại đúng flow thủ công đó, có kiểm tra từng bước để không lặp lại việc đã xong hoặc ghi đè cấu hình đang hoạt động.
+## Hai giai đoạn
+| Giai đoạn | Làm gì | Tần suất | Cần phiên mới? |
+|---|---|---|---|
+| A. Kết nối | Tìm và validate binary, `codegraph --version` / `doctor`, `claude mcp add ... serve --mcp --mermaid` | Mỗi máy 1 lần, hoặc khi nâng version | Có, sau khi add/sửa MCP |
+| B. Chuẩn bị repo | `codegraph_status` → `codegraph_init {path}` → `codegraph_index {}`, kiểm tra index cũ và `.gitignore` | Mỗi repo / mỗi phiên | Không |
 
-## Phạm vi & ranh giới với skill khác
-- **Dùng khi**: cần setup/kết nối/kiểm tra lại hạ tầng `codegraph` cho một repo.
-- **Không dùng khi**: cần review/phân tích bảo mật code → dùng skill `audit-code` (skill đó sẽ tự gợi ý chạy `codegraph-setup` nếu phát hiện tool `codegraph_*` chưa sẵn sàng).
+## Thay đổi so với bản cho codegraph v1
+- CLI v2 có thêm `install`, `uninstall`, `doctor`, `clean`, `embed`. Server có thêm `serve --http` (MCP Streamable HTTP) và `serve --graphql` (API + web UI).
+- MCP session phải được bind vào workspace (`codegraph_init {path}`) trước khi truy vấn. Index qua `codegraph_index {}`, không cần mở phiên mới.
+- Không dùng `rm -rf .codegraph` để re-index nữa, vì sẽ mất `config.toml` (`[[effect_rules]]`). Thay bằng `codegraph_index {}`, hoặc `codegraph clean` nếu cần dọn sạch.
+- Đăng ký MCP kèm `--mermaid` để bật `codegraph_mermaid`.
+- Không dùng `codegraph install --agent claude`. Lệnh này ghi vào `~/.claude/settings.json`, không phải nơi `claude mcp` quản lý, và còn cài kèm bộ skill upstream dễ chồng phạm vi với skill của team.
 
-## Cách hoạt động (tóm tắt)
-1. Kiểm tra `.codegraph/` đã tồn tại ở root repo chưa — làm trước tiên vì user có thể đã tự chạy `codegraph init` từ trước, tránh chạy `init` mù quáng hoặc ghi đè.
-2. Tìm `codegraph` binary và lấy **absolute path** của nó (`which codegraph`, hoặc dò trong rc file như `~/.zshrc` rồi `ls` trực tiếp thư mục đó — không `source` rc file, xem lý do ở mục dưới). Không tìm thấy ở đâu → dừng và báo cho user, không tự ý cài đặt.
-3. Kiểm tra MCP server `codegraph` đã đăng ký và đang Connected chưa (`claude mcp list`); nếu chưa có, hoặc có nhưng lỗi ENOENT do PATH → đăng ký/đăng ký lại bằng **absolute path** vừa tìm ở bước 2 (`claude mcp add codegraph --scope user -- <absolute-path>/codegraph serve --mcp`), không dùng bare `codegraph`.
-4. Dựa vào kết quả bước 1: chưa có `.codegraph/` → chạy `codegraph init --progress`; đã có → hỏi trước khi re-index thay vì tự ý ghi đè.
-5. Báo cáo ngắn gọn trạng thái MCP + index, và luôn nhắc mở phiên Claude Code mới sau khi add/sửa entry ở bước 3.
+## Cài binary (gợi ý, skill không tự làm)
+```bash
+cargo install --path <codegraph-rs>/crates/codegraph --locked --features fastembed
+```
+`fastembed` là tuỳ chọn: bật để có semantic search (`codegraph_search_symbol` với `match: semantic|hybrid`). Có thể tải sẵn model bằng `codegraph embed`.
 
-## Lưu ý quan trọng
-- **`source rc file` trong Bash tool không sửa được MCP.** MCP subprocess do tiến trình Claude Code chính spawn với PATH của lúc phiên khởi động — không liên quan tới PATH của một shell con do Bash tool tạo ra khi chạy `source`. `which codegraph` báo "tìm thấy" ngay sau `source` chỉ đúng trong đúng lệnh Bash đó, không có nghĩa MCP đã sửa được. Vì vậy skill không dùng `source` để verify, mà đăng ký MCP bằng absolute path để né hẳn vấn đề PATH-theo-phiên.
-- Tool `codegraph_*` **không xuất hiện ngay** trong phiên vừa chạy setup/sửa lỗi — cần mở phiên Claude Code mới để xác nhận, kể cả khi đã dùng absolute path.
-- Skill không tự ý xoá/ghi đè cấu hình MCP hoặc index đã tồn tại mà không hỏi trước.
-- Việc cài đặt binary `codegraph` (nếu chưa có ở đâu trên máy) nằm ngoài phạm vi skill này — skill chỉ kiểm tra và gợi ý, không tự tải/cài từ nguồn không xác thực.
+## Lưu ý
+- `source rc file` trong Bash tool không sửa được PATH của MCP. Luôn đăng ký bằng absolute path.
+- Path binary phải được validate (ký tự shell lạ, file thực thi, thư mục tin cậy) trước khi đưa vào `claude mcp add`.
+- Không tự xoá hay ghi đè cấu hình MCP, index, hay sửa `.gitignore` mà không hỏi.

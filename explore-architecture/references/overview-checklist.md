@@ -7,7 +7,7 @@
 
 ## 2. Layering & tổ chức module
 - Repo tổ chức theo layer kỹ thuật (controller/service/repository) hay theo domain/feature, hay monorepo nhiều service?
-- Hướng phụ thuộc giữa các layer/module có nhất quán không (vd layer dưới không được import layer trên) — chỉ nêu nếu có bằng chứng từ `codegraph_dependencies`, không suy đoán.
+- Hướng phụ thuộc giữa các layer/module có nhất quán không (vd layer dưới không được import layer trên) — chỉ nêu nếu có bằng chứng từ `codegraph_graphcode_dependencies`, không suy đoán.
 - Có tầng shared/common dùng chung giữa nhiều module không, mức độ coupling ra sao.
 
 ## 3. Domain model chính

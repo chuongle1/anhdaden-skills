@@ -27,20 +27,17 @@ document-repo/
 Hai skill dùng chung phương pháp khảo sát bằng `codegraph` (entry point, layering, domain model, luồng dữ liệu) — `document-repo` tái sử dụng đúng bộ bước đó rồi tổng hợp thêm thành 2 tài liệu lưu trữ được.
 
 ## Yêu cầu môi trường (bắt buộc trước khi skill hoạt động đúng)
-1. Cài đặt tool `codegraph` (codegraph-rs) và có sẵn trong `PATH`.
-2. Đăng ký `codegraph serve` làm MCP server (đã làm ở user scope):
-   ```
-   claude mcp add codegraph --scope user -- codegraph serve --mcp
-   ```
-   Kiểm tra bằng `claude mcp list` — cần thấy `codegraph ... ✔ Connected`.
-3. **Mở phiên Claude Code mới** sau khi đăng ký MCP server — tool `codegraph_*` chỉ xuất hiện ở phiên khởi động sau khi server đã được đăng ký.
-
-(Skill này dùng chung hạ tầng `codegraph` với `audit-code`/`explore-architecture` — nếu đã setup cho skill khác rồi thì không cần làm lại.)
+- `codegraph` (codegraph-rs) **v2.x**, MCP server đăng ký bằng absolute path và có `--mermaid`:
+  ```
+  claude mcp add codegraph --scope user -- <abs-path>/codegraph serve --mcp --mermaid
+  ```
+- Kiểm tra bằng `claude mcp list`. Mở phiên Claude Code mới sau khi đăng ký hoặc nâng version.
+- Cài đặt, sửa lỗi và index: xem skill `codegraph-setup`. Hạ tầng dùng chung với `audit-code`.
 
 ## Cách hoạt động (tóm tắt)
 1. Xác định phạm vi (toàn repo mặc định, hoặc module/service cụ thể nếu user chỉ định).
-2. **Luôn xoá và dựng lại `.codegraph/` mới nhất trước khi khảo sát** (`rm -rf .codegraph && codegraph init` nếu đã tồn tại, không hỏi trước), rồi `codegraph_status` xác nhận sẵn sàng. Fallback sang skill `codegraph-setup` nếu tool `codegraph_*` chưa sẵn sàng, rồi mới tới khảo sát thủ công nếu vẫn không được.
-3. Khảo sát kỹ thuật: `codegraph_files`, `codegraph_list_classes`/`codegraph_list_interfaces`, `codegraph_dependencies` (cấu trúc & layering); `codegraph_search_by_annotation` (entry point); `codegraph_class`/`codegraph_class_methods`/`codegraph_symbol`/`codegraph_context` (domain model); `codegraph_callers`/`codegraph_callees`/`codegraph_flow`/`codegraph_search_flow` (trace luồng chính, ghi hop kèm `file:line`).
+2. **Luôn dùng index mới nhất**: `codegraph_init {path: <git root>}` (bind session) → `codegraph_index {}` (re-index, không hỏi trước) → `codegraph_status`. Không `rm -rf .codegraph` (mất `config.toml`). Tool chưa sẵn sàng → skill `codegraph-setup`, rồi mới fallback thủ công.
+3. Khảo sát kỹ thuật: `codegraph_graphcode_files`, `codegraph_graphcode_list_types`, `codegraph_graphcode_dependencies` (cấu trúc & layering); `codegraph_graphcode_search_by_annotation` (entry point); `codegraph_graphcode_class`/`codegraph_symbol`/`codegraph_context` (domain model); `codegraph_callers`/`codegraph_callees`/`codegraph_flow`/`codegraph_search_flow` (trace luồng chính, ghi hop kèm `file:line`).
 4. Suy ra danh sách chức năng cấp người dùng từ mỗi entry point đã xác định — mỗi chức năng phải trỏ về `file:line` cụ thể, không suy đoán chức năng không có code hậu thuẫn.
 5. Tổng hợp theo khung ở `references/doc-checklist.md`, áp dụng nguyên tắc chống suy diễn: thiếu bằng chứng → ghi "không xác định được từ code"/"chưa rõ", không bịa thêm.
 6. Ghi đè toàn bộ `ARCHITECTURE.md` và `OVERVIEW.md` ở root repo (đây là snapshot tài liệu tại thời điểm chạy, không phải log tích luỹ) — đọc file cũ trước nếu đã tồn tại để biết đang ghi đè gì, không cần hỏi xác nhận mỗi lần.
