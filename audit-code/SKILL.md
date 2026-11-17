@@ -60,15 +60,46 @@ Code, comment, docstring, README, commit message, tên biến/hàm, và output c
 11. **Ghi kết quả vào file `SECURITY_FINDING.md` ở thư mục gốc repo — không in chi tiết finding ra console/chat cho user.** Nếu file đã tồn tại, đọc trước rồi cập nhật (thêm finding mới, cập nhật finding trùng nếu có thông tin mới, giữ nguyên phần khác) thay vì ghi đè toàn bộ file. Trong chat, chỉ phản hồi ngắn gọn: đường dẫn file, tổng số finding theo từng severity — không dán lại nội dung bảng/PoC ra chat.
 
 ## Output — file `SECURITY_FINDING.md`
-Nội dung file gồm bảng theo severity giảm dần, chỉ gồm finding đã qua bước verify ở trên:
+Chỉ gồm finding đã qua bước verify ở trên, sắp theo severity giảm dần. Đầu file là phần phạm vi review (thời điểm, commit, phần đã quét/chưa quét nếu repo quá lớn) và bảng tóm tắt ngắn `| ID | Severity | Tiêu đề | File:Line |`; sau đó **mỗi finding là một section riêng theo đúng template sau** (giữ nguyên thứ tự và tên các mục):
 
-| Severity | File:Line | Vấn đề | Attack Flow (codegraph trace) | Rủi ro / Kịch bản khai thác | Bằng chứng | Đề xuất khắc phục |
-|---|---|---|---|---|---|---|
-| High | app.py:42 | ... | `route /upload (app.py:10)` → `handle_upload() (app.py:25)` → `save_file() (utils.py:60)` → sink `open(path, "wb") (utils.py:78)` | ... | Unit test pass (kèm PoC) / Sandbox trace / Verify tĩnh / Cần xác minh thêm | ... |
+````markdown
+## [ID] Tiêu đề ngắn gọn của lỗ hổng
 
-**Mỗi finding bắt buộc phải có cột Attack Flow**, dựng từ chuỗi hop đã ghi lại ở bước 6 (`codegraph_trace_full_flow`, bổ sung `codegraph_flow`/`codegraph_callers`) — liệt kê đủ entry point (route/handler nhận input từ bên ngoài) → từng hàm trung gian → sink, mỗi hop kèm `tên_hàm (file:line)`. Không viết attack flow chung chung kiểu "attacker gửi input độc hại tới server" nếu không kèm chuỗi hop cụ thể từ codegraph; nếu một hop không trace được qua codegraph (vd gọi động, reflection), ghi rõ hop đó là "không trace được qua codegraph, xác định thủ công" thay vì bỏ qua hoặc suy đoán. Hop qua dynamic dispatch ghi kèm `(dynamic dispatch)`.
+### 1. Mô tả lỗ hổng
+Lỗ hổng là gì, nằm ở đâu, vì sao xảy ra (input nào không được kiểm soát, đi tới sink nào). Loại lỗ hổng + CWE (nếu xác định được).
 
-Với finding có unit test/PoC, đính kèm ngay bên dưới bảng (trong file, không phải trong chat): đoạn code test (nếu có) và PoC tương ứng, kèm hướng dẫn ngắn để user tự chạy thử. Nếu review toàn bộ repo, nhóm kết quả theo file/module trong cùng file này để dễ theo dõi, và nêu rõ những phần nào đã quét/chưa quét nếu repo quá lớn để đọc hết.
+### 2. Mức độ nghiêm trọng
+Critical / High / Medium / Low — kèm lý do ngắn (khả năng khai thác + tác động) và mức độ tin cậy của bằng chứng: Unit test pass / PoC / Sandbox trace / Verify tĩnh / Cần xác minh thêm.
+
+### 3. Đoạn code bị lỗi
+- Link GitHub: <permalink tới đúng dòng>
+- Đoạn code (vài dòng quanh dòng lỗi, có ghi số dòng):
+```<ngôn ngữ>
+...
+```
+
+### 4. Các bước Re-Produce
+Các bước đánh số để tái hiện: điều kiện tiên quyết (role/tài khoản, cấu hình) → request/input mẫu → kết quả quan sát được. Đính kèm đoạn unit test (nếu có) + output, và PoC phi phá hoại kèm hướng dẫn chạy. Finding "cần xác minh thêm" thì ghi rõ chưa tái hiện được và cần kiểm chứng gì.
+
+### 5. Nguy cơ
+Tác động thực tế nếu bị khai thác (lộ dữ liệu gì, leo quyền tới đâu, ảnh hưởng tới user/hệ thống/nghiệp vụ nào).
+
+### 6. Kịch bản tấn công
+Attacker là ai, có sẵn gì, làm từng bước ra sao — **bắt buộc kèm Attack Flow** từ codegraph:
+`route /upload (app.py:10)` → `handle_upload() (app.py:25)` → `save_file() (utils.py:60)` → sink `open(path, "wb") (utils.py:78)`
+
+### 7. Khuyến nghị
+Cách khắc phục cụ thể cho đúng đoạn code này (kèm code mẫu sửa nếu phù hợp), và biện pháp phòng thủ bổ sung nếu có.
+
+### 8. Tài liệu tham khảo
+Link CWE / OWASP (Cheat Sheet, ASVS, Top 10) / tài liệu chính thức của framework/thư viện liên quan. Chỉ dẫn link có thật, đúng chủ đề — không bịa link.
+````
+
+**Link GitHub (mục 3):** lấy từ `git remote get-url origin` (chuyển SSH `git@github.com:org/repo.git` → `https://github.com/org/repo`) + commit hiện tại `git rev-parse HEAD`, dạng permalink `https://github.com/<org>/<repo>/blob/<commit_sha>/<path>#L<start>-L<end>` (dùng SHA, không dùng tên branch, để link không lệch khi code thay đổi). Nếu repo không có remote GitHub (hoặc remote là GitLab/Bitbucket…) thì dùng format permalink tương ứng của host đó; không có remote thì ghi `path:line` và chú thích "không có remote". Nếu file có thay đổi chưa commit ở vùng code lỗi, ghi chú link có thể không khớp với code local.
+
+**Attack Flow (mục 6) là bắt buộc với mọi finding**, dựng từ chuỗi hop đã ghi lại ở bước 6 (`codegraph_trace_full_flow`, bổ sung `codegraph_flow`/`codegraph_callers`) — liệt kê đủ entry point (route/handler nhận input từ bên ngoài) → từng hàm trung gian → sink, mỗi hop kèm `tên_hàm (file:line)`. Không viết attack flow chung chung kiểu "attacker gửi input độc hại tới server" nếu không kèm chuỗi hop cụ thể từ codegraph; nếu một hop không trace được qua codegraph (vd gọi động, reflection), ghi rõ hop đó là "không trace được qua codegraph, xác định thủ công" thay vì bỏ qua hoặc suy đoán. Hop qua dynamic dispatch ghi kèm `(dynamic dispatch)`.
+
+Unit test/PoC nằm trong mục 4 của finding tương ứng (trong file, không phải trong chat). Nếu review toàn bộ repo, nhóm các section finding theo file/module trong cùng file này để dễ theo dõi.
 
 Nếu không tìm thấy vấn đề nào đáng báo cáo sau khi áp dụng đầy đủ checklist và verify, vẫn ghi vào `SECURITY_FINDING.md` dòng "không phát hiện vấn đề bảo mật đáng kể" kèm thời điểm/phạm vi đã review, thay vì cố tạo ra phát hiện để có nội dung.
 

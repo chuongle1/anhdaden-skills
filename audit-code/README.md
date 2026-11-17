@@ -39,12 +39,12 @@ audit-code/
    - Bằng chứng hành vi: `codegraph_graphcode_sandbox`
    - Config/IaC: `codegraph_graphdoc_ingest_dir` + `graphdoc_search` / `search_value`
 4. Áp dụng checklist ở `references/checklist.md`, chỉ báo cáo phát hiện có bằng chứng cụ thể trong code.
-5. Trace khả năng khai thác bằng `codegraph_trace_full_flow` (input → sink), ghi lại chuỗi hop; hop qua interface được fan-out ra mọi implementation (entry point → hàm trung gian → sink, kèm `file:line`) — dữ liệu này bắt buộc dùng để dựng cột Attack Flow trong báo cáo.
+5. Trace khả năng khai thác bằng `codegraph_trace_full_flow` (input → sink), ghi lại chuỗi hop; hop qua interface được fan-out ra mọi implementation (entry point → hàm trung gian → sink, kèm `file:line`) — dữ liệu này bắt buộc dùng để dựng Attack Flow trong mục "Kịch bản tấn công" của báo cáo.
 6. **Verify tĩnh** — chủ động tìm lý do bác bỏ (lớp validation/sanitize bị bỏ sót, input có thực sự do bên ngoài kiểm soát không, verify độc lập từng finding cùng pattern) trước khi giữ lại; với guard rẽ nhánh có thể chạy `codegraph_graphcode_sandbox` ép cả 2 nhánh làm bằng chứng bổ trợ.
 7. **Xác minh bằng unit test khi khả thi** — viết test tạm nhắm vào luồng nghi vấn để lấy bằng chứng thực nghiệm; pass → tăng độ tin cậy, không tái hiện được → hạ độ tin cậy/loại bỏ. Không commit test tạm vào repo user.
 8. **Tạo PoC phi phá hoại** cho finding đã xác nhận (test pass hoặc verify tĩnh đủ chắc), để user tự chạy kiểm chứng thêm — không thực thi hành động phá hoại thật, chỉ minh hoạ khả năng khai thác trong phạm vi được cấp quyền review.
 9. Xếp severity (Critical/High/Medium/Low, ưu tiên nâng cho finding có evidence từ test/PoC).
-10. **Ghi kết quả vào `SECURITY_FINDING.md` ở root repo** (đọc file cũ và cập nhật nếu đã tồn tại, không ghi đè toàn bộ) — bảng kết quả + PoC/test nằm trong file này, **mỗi finding phải có cột Attack Flow dựng từ chuỗi hop codegraph** (entry point → hàm trung gian → sink), **không in chi tiết ra chat**; trong chat chỉ báo đường dẫn file và tổng số finding theo severity.
+10. **Ghi kết quả vào `SECURITY_FINDING.md` ở root repo** (đọc file cũ và cập nhật nếu đã tồn tại, không ghi đè toàn bộ) — bảng tóm tắt + mỗi finding một section theo template cố định: **Mô tả lỗ hổng → Mức độ nghiêm trọng → Đoạn code bị lỗi (permalink GitHub + đoạn code) → Các bước Re-Produce (kèm test/PoC) → Nguy cơ → Kịch bản tấn công (bắt buộc kèm Attack Flow từ chuỗi hop codegraph: entry point → hàm trung gian → sink) → Khuyến nghị → Tài liệu tham khảo**, **không in chi tiết ra chat**; trong chat chỉ báo đường dẫn file và tổng số finding theo severity.
 
 Nếu `codegraph_init`/`codegraph_index` lỗi hoặc các tool `codegraph_*` không khả dụng / là bản v1, skill sẽ gợi ý chạy skill `codegraph-setup` (kiểm tra/kết nối lại MCP + index) trước; nếu vẫn không được mới fallback sang khảo sát thủ công (Grep/Explore) — không im lặng bỏ qua.
 
